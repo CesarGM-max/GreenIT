@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Computación Verde: el costo ambiental de la nube</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d0f;
+    --bg-card: #10161a;
+    --bg-card-hover: #131c20;
+    --accent: #34f5c5;
+    --accent-dim: rgba(52, 245, 197, 0.15);
+    --text: #e7f1ee;
+    --text-dim: #97a6a2;
+    --border: #1e2a2c;
+    --error: #ff6b6b;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  label, .mono {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 48px 0 40px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero .eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(52, 245, 197, 0.35);
+    border-radius: 999px;
+    padding: 6px 14px;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    line-height: 1.15;
+    margin-bottom: 18px;
+  }
+
+  .hero h1 .accent { color: var(--accent); }
+
+  .hero p {
+    color: var(--text-dim);
+    font-size: 1.02rem;
+    line-height: 1.6;
+    max-width: 60ch;
+  }
+
+  /* Cards */
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 40px 0 48px;
+  }
+
+  @media (min-width: 640px) {
+    .cards { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 20px;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(52, 245, 197, 0.45);
+    background: var(--bg-card-hover);
+  }
+
+  .card .num {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    border: 1px solid rgba(52, 245, 197, 0.35);
+    border-radius: 8px;
+    padding: 3px 9px;
+    margin-bottom: 14px;
+  }
+
+  .card h3 {
+    font-size: 1.02rem;
+    margin-bottom: 8px;
+    line-height: 1.35;
+  }
+
+  .card p {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Form */
+  .form-section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+  }
+
+  .form-section > p {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    margin: 0 0 24px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 14px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .field textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .field .hint {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+    min-height: 1.1em;
+  }
+
+  .field.invalid input,
+  .field.invalid textarea {
+    border-color: var(--error);
+  }
+
+  .field.invalid .hint {
+    color: var(--error);
+  }
+
+  button[type="submit"] {
+    margin-top: 6px;
+    background: var(--accent);
+    color: #06110d;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  }
+
+  button[type="submit"]:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(52, 245, 197, 0.25);
+  }
+
+  button[type="submit"]:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .status-msg {
+    display: none;
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .status-msg.show { display: block; }
+
+  .status-msg.success {
+    background: var(--accent-dim);
+    border: 1px solid rgba(52, 245, 197, 0.4);
+    color: var(--accent);
+  }
+
+  .status-msg.error {
+    background: rgba(255, 107, 107, 0.12);
+    border: 1px solid rgba(255, 107, 107, 0.4);
+    color: var(--error);
+  }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.78rem;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <section class="hero">
+      <span class="eyebrow mono">Desarrollo Sustentable · ACD-0908</span>
+      <h1>Computación Verde: el costo <span class="accent">ambiental</span> de la nube</h1>
+      <p>
+        Los archivos que guardas "en la nube" no flotan en ningún lugar abstracto: viven físicamente
+        en centros de datos, edificios llenos de servidores que consumen energía eléctrica sin parar
+        y grandes cantidades de agua para mantenerse fríos. Cada foto, correo o documento que subes
+        tiene un costo ambiental real, aunque no lo veamos.
+      </p>
+    </section>
+
+    <section class="cards">
+      <div class="card">
+        <span class="num mono">01</span>
+        <h3>Abre una IA generativa</h3>
+        <p>Usa ChatGPT, Gemini, Copilot o Claude — la que prefieras.</p>
+      </div>
+      <div class="card">
+        <span class="num mono">02</span>
+        <h3>Pregúntale sobre el impacto ambiental</h3>
+        <p>Pídele que te explique el impacto ambiental de los centros de datos y 3 principios de "computación verde".</p>
+      </div>
+      <div class="card">
+        <span class="num mono">03</span>
+        <h3>Escribe tu propia opinión</h3>
+        <p>Con esa información, redacta tu opinión con tus propias palabras — sin copiar y pegar la respuesta de la IA.</p>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Comparte tu opinión</h2>
+      <p>Completa el formulario con tu nombre, correo y tu opinión sobre computación verde.</p>
+
+      <form id="opinionForm" novalidate>
+        <div class="field" id="field-nombre">
+          <label for="nombre">Nombre completo</label>
+          <input type="text" id="nombre" name="nombre" autocomplete="name" placeholder="Tu nombre completo">
+          <div class="hint" id="hint-nombre"></div>
+        </div>
+
+        <div class="field" id="field-correo">
+          <label for="correo">Correo electrónico</label>
+          <input type="email" id="correo" name="correo" autocomplete="email" placeholder="tucorreo@ejemplo.com">
+          <div class="hint" id="hint-correo"></div>
+        </div>
+
+        <div class="field" id="field-opinion">
+          <label for="opinion">Tu opinión</label>
+          <textarea id="opinion" name="opinion" placeholder="Escribe aquí tu opinión sobre el impacto ambiental de los centros de datos y la computación verde..."></textarea>
+          <div class="hint" id="hint-opinion"></div>
+        </div>
+
+        <button type="submit" id="submitBtn">Enviar opinión</button>
+
+        <div class="status-msg" id="statusMsg"></div>
+      </form>
+    </section>
+
+    <footer>
+      Práctica de Computación Verde — Desarrollo Sustentable (ACD-0908) · Tecnológico Nacional de México, Campus Mazatlán
+    </footer>
+
+  </div>
+
+  <script>
+    // Reemplaza esta constante con la URL real de tu webhook de Make.com
+    const WEBHOOK_URL = "https://hook.us2.make.com/gl1qhan15vrdfcoaoubsltd7rimvewyy";
+
+    const form = document.getElementById("opinionForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const statusMsg = document.getElementById("statusMsg");
+
+    const fields = {
+      nombre: {
+        input: document.getElementById("nombre"),
+        field: document.getElementById("field-nombre"),
+        hint: document.getElementById("hint-nombre"),
+        validate: (v) => v.trim().length >= 3,
+        message: "El nombre debe tener al menos 3 caracteres."
+      },
+      correo: {
+        input: document.getElementById("correo"),
+        field: document.getElementById("field-correo"),
+        hint: document.getElementById("hint-correo"),
+        validate: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()),
+        message: "Ingresa un correo electrónico con formato válido."
+      },
+      opinion: {
+        input: document.getElementById("opinion"),
+        field: document.getElementById("field-opinion"),
+        hint: document.getElementById("hint-opinion"),
+        validate: (v) => v.trim().length >= 15,
+        message: "Tu opinión debe tener al menos 15 caracteres."
+      }
+    };
+
+    function validateField(key, showError) {
+      const f = fields[key];
+      const valid = f.validate(f.input.value);
+      if (showError) {
+        f.field.classList.toggle("invalid", !valid);
+        f.hint.textContent = valid ? "" : f.message;
+      }
+      return valid;
+    }
+
+    function validateAll(showErrors) {
+      let allValid = true;
+      for (const key in fields) {
+        const valid = validateField(key, showErrors);
+        if (!valid) allValid = false;
+      }
+      return allValid;
+    }
+
+    // Validación en vivo mientras el usuario escribe
+    Object.keys(fields).forEach((key) => {
+      fields[key].input.addEventListener("input", () => validateField(key, true));
+      fields[key].input.addEventListener("blur", () => validateField(key, true));
+    });
+
+    function showStatus(type, text) {
+      statusMsg.textContent = text;
+      statusMsg.className = "status-msg show " + type;
+    }
+
+    function hideStatus() {
+      statusMsg.className = "status-msg";
+      statusMsg.textContent = "";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      hideStatus();
+
+      const isValid = validateAll(true);
+      if (!isValid) {
+        showStatus("error", "Revisa los campos marcados antes de enviar.");
+        return;
+      }
+
+      const payload = {
+        nombre: fields.nombre.input.value.trim(),
+        correo: fields.correo.input.value.trim(),
+        opinion: fields.opinion.input.value.trim()
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Enviando...";
+
+      try {
+        const response = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error("Respuesta no válida del servidor (" + response.status + ")");
+        }
+
+        showStatus("success", "¡Gracias, " + payload.nombre + "! Tu opinión fue enviada correctamente.");
+        form.reset();
+        Object.keys(fields).forEach((key) => {
+          fields[key].field.classList.remove("invalid");
+          fields[key].hint.textContent = "";
+        });
+      } catch (err) {
+        showStatus("error", "No se pudo enviar tu opinión. Verifica tu conexión e inténtalo de nuevo.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Enviar opinión";
+      }
+    });
+  </script>
+</body>
+</html>
